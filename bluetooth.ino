@@ -40,7 +40,7 @@ void loop() {
   }
   command = receiveBluetooth();
   if (command != "") {
-    debugln("COM:" + (String)command);
+    debugln("[" + (String)millis() + "] " + (String)command);
     if (command == "IR:on") {
       analogWrite(LED, 250);
     } else if (command == "IR:off") {
@@ -55,10 +55,8 @@ String receiveBluetooth() {
     char c = BLUETOOTH_SERIAL.read();
     if ( isListening) {
       if (c == START_MARKER) {
-        debugln("START");
         message = "";
       } else if (c == END_MARKER) {
-        debugln("END");
         isListening = false;
         return (message);
       } else {
@@ -66,7 +64,6 @@ String receiveBluetooth() {
       }
     } else {
       if (c == START_MARKER) {
-        debugln("START");
         message = "";
         isListening = true;
       }
