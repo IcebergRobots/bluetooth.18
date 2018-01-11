@@ -1,31 +1,39 @@
 #define DEBUG true
-#define debug(_str_); if(DEBUG){Serial.print(_str_);}
-#define debugln(_str_); if(DEBUG){Serial.println(_str_);}
+#define DEBUG_SERIAL Serial
+#define BLUETOOTH true
+#define BLUETOOTH_SERIAL Serial3
 
-#define SEND true
+#define START_MARKER '<'
+#define END_MARKER '>'
+
+// Befehle für serielle Kommunikation (NICHT VERÄNDERN):
+#define debug(_str_); if(DEBUG){DEBUG_SERIAL.print(_str_);}
+#define debugln(_str_); if(DEBUG){DEBUG_SERIAL.println(_str_);}
+#define bluetooth(_str_); if(BLUETOOTH){BLUETOOTH_SERIAL.print(START_MARKER);BLUETOOTH_SERIAL.print(_str_);BLUETOOTH_SERIAL.print(END_MARKER);}
+// ---
+
 #define LED 13
 #define BUTTON A0
 
 String bluetooth;
-unsigned long lastMes = 0;
 bool isButton = false;
 bool lastButton = false;
 
 void setup() {
   pinMode(LED, OUTPUT);
   pinMode(BUTTON, INPUT_PULLUP);
-  Serial.begin(9600);
+  DEBUG_SERIAL.begin(9600);
   debugln("RESTART");
-  Serial3.begin(38400);
-  Serial3.println("IR:available");
+  BLUETOOTH_SERIAL.begin(38400);
+  bluetooth("IR:available");
 }
 void loop() {
   isButton = !digitalRead(BUTTON);
   if (isButton != lastButton) {
     if (isButton) {
-      Serial3.write("<set led on>");
+      bluetooth("IR:on");
     } else {
-      Serial3.print("<set led off>");
+      bluetooth("IR:off");
     }
   }
   if (Serial3.available() > 0) {
@@ -39,3 +47,4 @@ void loop() {
   }
   lastButton = isButton;
 }
+
