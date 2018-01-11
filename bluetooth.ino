@@ -17,7 +17,7 @@
 
 String message;
 String command;
-bool isReceiving = false;
+bool  isListening = false;
 bool isButton = false;
 bool lastButton = false;
 
@@ -53,13 +53,13 @@ void loop() {
 String receiveBluetooth() {
   if (BLUETOOTH_SERIAL.available() > 0) {
     char c = BLUETOOTH_SERIAL.read();
-    if (isReceiving) {
+    if ( isListening) {
       if (c == START_MARKER) {
         debugln("START");
         message = "";
       } else if (c == END_MARKER) {
         debugln("END");
-        isReceiving = false;
+        isListening = false;
         return (message);
       } else {
         message += c;
@@ -68,7 +68,7 @@ String receiveBluetooth() {
       if (c == START_MARKER) {
         debugln("START");
         message = "";
-        isReceiving = true;
+        isListening = true;
       }
     }
 
