@@ -9,10 +9,11 @@ String bluetooth;
 enum ROLE {MASTER, SLAVE};
 ROLE r;
 bool isLed = false;
+bool gotMes = false;
 unsigned long lastMes = 0;
 
 void setup() {
-  r = MASTER;
+  r = MASTER;   //==============================================00
   pinMode(LED, OUTPUT);
   pinMode(BUTTON, INPUT_PULLUP);
   Serial.begin(9600);
@@ -21,42 +22,52 @@ void setup() {
   } else {
     debugln("RESTART as SLAVE");
   }
-  Serial3.begin(9600);
+  Serial3.begin(38400);
   Serial3.println("IR:available");
 }
 void loop() {
-  analogWrite(LED,200*!digitalRead(BUTTON));
+  analogWrite(LED, 200 * !digitalRead(BUTTON));
   switch (r)
   {
     case MASTER:
-      if (millis() - lastMes > 1000) {
+      if (millis() - lastMes > 3000) {
         lastMes = millis();
+        analogWrite(LED, 100);
+        delay(10);
+        analogWrite(LED, 0);
         if (isLed) {
-          delay(10);
-          debugln("sent: off");
-          Serial3.println("IR:off");
+          char mes[] = "42";
+          debugln("sent: " + (String)mes);
+          Serial3.print(mes);
         } else {
-          debugln("sent: on");
-          Serial3.println("IR:on");
+          char mes[] = "IR:on";
+          debugln("sent: " + (String)mes);
+          Serial3.write(mes);
         }
         isLed = !isLed;
       }
+      delay(100);
       break;
     case SLAVE:
       if (Serial3.available() > 0) {
-        bluetooth = Serial3.read();
-        debugln(bluetooth);
-        if (bluetooth == "IR:on") {
+        gotMes = true;
+        bluetooth = Serial3.readString();
+        Serial.print((String)bluetooth+" ");
+        /*if (bluetooth == "IR:on") {
           digitalWrite(LED, 1);
           Serial3.println("turned on");
         } else if (bluetooth == "IR:off") {
           digitalWrite(LED, 0);
           Serial3.println("turned off");
+        }*/
+      } else {
+        if(gotMes) {
+          Serial.println();
         }
+        gotMes = false;
       }
+      delay(20);
       break;
     default: break;
   }
-
-  delay(100);
 }
