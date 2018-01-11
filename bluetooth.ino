@@ -7,26 +7,26 @@
 #define END_MARKER '>'
 
 // Befehle für serielle Kommunikation (NICHT VERÄNDERN):
-#define debug(_str_); if(DEBUG){Serial.print(_str_);}
-#define debugln(_str_); if(DEBUG){Serial.println(_str_);}
-#define bluetooth(_str_); Serial3.print(START_MARKER);Serial3.print(_str_);Serial3.print(END_MARKER);
+#define debug(_str_); if(DEBUG){DEBUG_SERIAL.print(_str_);}
+#define debugln(_str_); if(DEBUG){DEBUG_SERIAL.println(_str_);}
+#define bluetooth(_str_); if(BLUETOOTH){BLUETOOTH_SERIAL.print(START_MARKER);BLUETOOTH_SERIAL.print(_str_);BLUETOOTH_SERIAL.print(END_MARKER);}
 // ---
 
 #define LED 13
 #define BUTTON A0
 
-String message = "";
-String command = "";
+String message;
+String command;
+bool isReceiving = false;
 bool isButton = false;
 bool lastButton = false;
-bool isReceiving = false;
 
 void setup() {
   pinMode(LED, OUTPUT);
   pinMode(BUTTON, INPUT_PULLUP);
-  Serial.begin(9600);
+  DEBUG_SERIAL.begin(9600);
   debugln("RESTART");
-  Serial3.begin(38400);
+  BLUETOOTH_SERIAL.begin(38400);
   bluetooth("IR:available");
 }
 void loop() {
@@ -40,7 +40,7 @@ void loop() {
   }
   command = receiveBluetooth();
   if (command != "") {
-    debugln(command);
+    debugln("COM:" + (String)command);
     if (command == "IR:on") {
       analogWrite(LED, 250);
     } else if (command == "IR:off") {
@@ -48,33 +48,29 @@ void loop() {
     }
   }
   lastButton = isButton;
-  delay(1);
 }
 
 String receiveBluetooth() {
-  char c;
-  while (Serial3.available() > 0) {
-    c = Serial3.read();
-    debugln(c);
+  if (BLUETOOTH_SERIAL.available() > 0) {
+    char c = BLUETOOTH_SERIAL.read();
     if (isReceiving) {
       if (c == START_MARKER) {
+        debugln("START");
         message = "";
       } else if (c == END_MARKER) {
+        debugln("END");
         isReceiving = false;
         return (message);
       } else {
         message += c;
-        debugln("mes=" + (String)message);
       }
     } else {
       if (c == START_MARKER) {
+        debugln("START");
         message = "";
         isReceiving = true;
       }
     }
-    return ("");
-  }
-}
 
   }
   return ("");
