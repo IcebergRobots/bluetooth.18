@@ -33,17 +33,17 @@ void loop() {
   isButton = !digitalRead(BUTTON);
   if (isButton != lastButton) {
     if (isButton) {
-      bluetooth("IR:on");
+      bluetooth("on");
     } else {
-      bluetooth("IR:off");
+      bluetooth("off");
     }
   }
   command = receiveBluetooth();
   if (command != "") {
     debugln("[" + (String)millis() + "] " + (String)command);
-    if (command == "IR:on") {
+    if (command == "on") {
       analogWrite(LED, 250);
-    } else if (command == "IR:off") {
+    } else if (command == "off") {
       analogWrite(LED, 0);
     }
   }
