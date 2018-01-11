@@ -8,41 +8,40 @@
 String bluetooth;
 enum ROLE {MASTER, SLAVE};
 ROLE r;
-bool isLed = false;
-bool gotMes = false;
 unsigned long lastMes = 0;
+bool isLed = false;
 
 void setup() {
-  r = MASTER;   //==============================================00
-  pinMode(LED, OUTPUT);
-  pinMode(BUTTON, INPUT_PULLUP);
+  r = SLAVE;   //==============================================00
   Serial.begin(9600);
-  if (r == MASTER) {
-    debugln("RESTART as MASTER");
-  } else {
-    debugln("RESTART as SLAVE");
-  }
-  Serial3.begin(38400);
-  Serial3.println("IR:available");
-}
-void loop() {
-  analogWrite(LED, 200 * !digitalRead(BUTTON));
   switch (r)
   {
     case MASTER:
-      if (millis() - lastMes > 3000) {
+      debugln("RESTART as MASTER");
+      Serial3.begin(38400);
+      Serial3.println("IR:available");
+      break;
+    case SLAVE:
+      debugln("RESTART as SLAVE");
+      Serial3.begin(9600);
+      break;
+    default: break;
+  }
+}
+void loop() {
+  switch (r)
+  {
+    case MASTER:
+      if (millis() - lastMes > 2000) {
         lastMes = millis();
-        analogWrite(LED, 100);
+        analogWrite(LED, 200);
         delay(10);
         analogWrite(LED, 0);
         if (isLed) {
           char mes[] = "42";
-          debugln("sent: " + (String)mes);
           Serial3.print(mes);
         } else {
-          char mes[] = "IR:on";
-          debugln("sent: " + (String)mes);
-          Serial3.write(mes);
+          Serial3.print("IR:on");
         }
         isLed = !isLed;
       }
@@ -50,23 +49,9 @@ void loop() {
       break;
     case SLAVE:
       if (Serial3.available() > 0) {
-        gotMes = true;
         bluetooth = Serial3.readString();
-        Serial.print((String)bluetooth+" ");
-        /*if (bluetooth == "IR:on") {
-          digitalWrite(LED, 1);
-          Serial3.println("turned on");
-        } else if (bluetooth == "IR:off") {
-          digitalWrite(LED, 0);
-          Serial3.println("turned off");
-        }*/
-      } else {
-        if(gotMes) {
-          Serial.println();
-        }
-        gotMes = false;
+        Serial.println(bluetooth);
       }
-      delay(20);
       break;
     default: break;
   }
