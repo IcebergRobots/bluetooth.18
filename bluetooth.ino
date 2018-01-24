@@ -20,6 +20,7 @@ String command;
 bool  isListening = false;
 bool isButton = false;
 bool lastButton = false;
+bool isLed = false;
 
 void setup() {
   pinMode(LED, OUTPUT);
@@ -30,21 +31,20 @@ void setup() {
   bluetooth("IR:available");
 }
 void loop() {
+  analogWrite(LED, isLed);
   isButton = !digitalRead(BUTTON);
+
+  // bluetooth senden
   if (isButton != lastButton) {
-    if (isButton) {
-      bluetooth("on");
-    } else {
-      bluetooth("off");
-    }
+    bluetooth("heartbeat");
   }
+
+  // bluetooth auslesen
   command = receiveBluetooth();
   if (command != "") {
     debugln("[" + (String)millis() + "] " + (String)command);
-    if (command == "on") {
-      analogWrite(LED, 250);
-    } else if (command == "off") {
-      analogWrite(LED, 0);
+    if (command == "heartbeat") {
+      isLed = !isLed;
     }
   }
   lastButton = isButton;
