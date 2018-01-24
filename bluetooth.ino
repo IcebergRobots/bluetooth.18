@@ -31,19 +31,19 @@ void setup() {
   bluetooth("IR:available");
 }
 void loop() {
-  analogWrite(LED, isLed);
+  digitalWrite(LED, isLed);
   isButton = !digitalRead(BUTTON);
 
   // bluetooth senden
   if (isButton != lastButton) {
-    bluetooth("heartbeat");
+    bluetooth("h");
   }
 
   // bluetooth auslesen
   command = receiveBluetooth();
   if (command != "") {
-    debugln("[" + (String)millis() + "] " + (String)command);
-    if (command == "heartbeat") {
+    //debugln("[" + (String)millis() + "] " + (String)command);
+    if (command == "h") {
       isLed = !isLed;
     }
   }
